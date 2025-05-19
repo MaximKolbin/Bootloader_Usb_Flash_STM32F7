@@ -27,6 +27,8 @@ stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_flash_ex.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_pwr.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_pwr_ex.h
+stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_tim.h
+stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_tim_ex.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_uart.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_uart_ex.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_pcd.h
@@ -52,3 +54,7 @@ stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Middlewares\ST\STM32_USB_Host_Librar
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Inc\usbh_msc.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Inc\usbh_msc_bot.h
 stm32f746zg_nucleo\exe\main.o: ..\..\STM32F\Middlewares\ST\STM32_USB_Host_Library\Class\MSC\Inc\usbh_msc_scsi.h
+stm32f746zg_nucleo\exe\main.o: ../Inc/tim.h
+stm32f746zg_nucleo\exe\main.o: ../Inc/main.h
+stm32f746zg_nucleo\exe\main.o: ../Inc/gpio.h
+stm32f746zg_nucleo\exe\main.o: ../Inc/bootloader_conf.h

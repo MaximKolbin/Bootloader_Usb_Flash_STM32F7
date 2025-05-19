@@ -22,29 +22,22 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 H:\Срочно ссохранить\Новая папка (2)\Bootloader_F7\MDK-ARM\Project.uvprojx
-Project File Date:  05/13/2025
+Project File Date:  05/15/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin'
 Build target 'STM32F746ZG_Nucleo'
+compiling stm32f7xx_it.c...
+compiling tim.c...
+compiling gpio.c...
+..\Src\gpio.c(66): warning:  #177-D: variable "GPIO_InitStruct"  was declared but never referenced
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+..\Src\gpio.c: 1 warning, 0 errors
 compiling main.c...
-../Src/main.c(180): warning:  #177-D: variable "res"  was declared but never referenced
-    FRESULT res;                                          /* FatFs function common result code */
-../Src/main.c(181): warning:  #177-D: variable "byteswritten"  was declared but never referenced
-    uint32_t byteswritten, bytesread;                     /* File write/read counts */
-../Src/main.c(181): warning:  #177-D: variable "bytesread"  was declared but never referenced
-    uint32_t byteswritten, bytesread;                     /* File write/read counts */
-../Src/main.c(182): warning:  #177-D: variable "wtext"  was declared but never referenced
-    uint8_t wtext[] = "This is STM32 working with FatFs"; /* File write buffer */
-../Src/main.c(184): warning:  #177-D: variable "rtext"  was declared but never referenced
-  	uint8_t rtext[100];
-../Src/main.c(185): warning:  #177-D: variable "current_size"  was declared but never referenced
-  	uint32_t current_size = 0;
-../Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=22764 RO-data=1640 RW-data=112 ZI-data=9376  
+Program Size: Code=24584 RO-data=1640 RW-data=112 ZI-data=9448  
 FromELF: creating hex file...
-"STM32F746ZG_Nucleo\Exe\STM32F7-Nucleo_144.axf" - 0 Error(s), 6 Warning(s).
+"STM32F746ZG_Nucleo\Exe\STM32F7-Nucleo_144.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -67,7 +60,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.6.0
-Build Time Elapsed:  00:00:04
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>

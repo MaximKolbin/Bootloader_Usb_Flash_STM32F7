@@ -22,11 +22,16 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
+#include "stm32f7xx_hal_tim.h"
+#include "stm32f7xx_hal_tim_ex.h"
 //#include "stm32f7xx_nucleo_144.h"
 
 /* FatFs includes component */
 #include "ff_gen_drv.h"
 #include "usbh_diskio.h"
+#include "tim.h"
+#include "gpio.h"
+#include "bootloader_conf.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -41,6 +46,12 @@
 #define ADDR_FLASH_SECTOR_6     ((uint32_t)0x08080000) /* Base address of Sector 6, 256 Kbytes */
 #define ADDR_FLASH_SECTOR_7     ((uint32_t)0x080C0000) /* Base address of Sector 7, 256 Kbytes */
 
+#define LD1_GREEN_Pin GPIO_PIN_1
+#define LD1_GREEN_GPIO_Port GPIOB
+#define LD2_RED_Pin GPIO_PIN_2
+#define LD2_RED_GPIO_Port GPIOB
+
+void Error_Handler(void);
 /* Exported functions ------------------------------------------------------- */
 #endif /* __MAIN_H */
 

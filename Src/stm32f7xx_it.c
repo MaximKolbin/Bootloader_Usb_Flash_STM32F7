@@ -27,7 +27,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern HCD_HandleTypeDef hhcd;
-
+extern TIM_HandleTypeDef htim6;
+extern uint32_t time_counter;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /******************************************************************************/
@@ -157,4 +158,24 @@ void OTG_FS_IRQHandler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
+
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+	time_counter ++;
+	HAL_GPIO_TogglePin(GPIOB, LD1_GREEN_Pin);	
+	/*if (Time100ms<4294967295)	
+			{
+				Time100ms++;
+			}
+			else 
+			{
+				Time100ms = 0;
+			}	*/
+  /* USER CODE END TIM6_DAC_IRQn 1 */
+}
 

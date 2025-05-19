@@ -20,23 +20,24 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
 #define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_1   /* Start @ of user Flash area */
 #define FLASH_USER_END_ADDR     (ADDR_FLASH_SECTOR_7-1)   /* End @ of user Flash area */
 
-#define DATA_32                 ((uint32_t)0x12345678)
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
 uint32_t FirstSector = 0, NbOfSectors = 0;
 uint32_t Address = 0, SECTORError = 0;
-__IO uint32_t data32 = 0 , MemoryProgramStatus = 0;
-__IO uint32_t p_data32;
-__IO uint32_t write_size = 0;
+//__IO uint32_t data32 = 0 , MemoryProgramStatus = 0;
+//__IO uint32_t p_data32;
+//__IO uint32_t write_size = 0;
+
 FATFS USBDISKFatFs;           /* File system object for USB disk logical drive */
-FIL MyFile;                   /* File object */
+FIL firewareFile;                   /* File object */
 char USBDISKPath[4];          /* USB Host logical drive path */
 USBH_HandleTypeDef hUSBHost; /* USB Host handle */
 
@@ -49,13 +50,13 @@ typedef enum {
 
 MSC_ApplicationTypeDef AppliState = APPLICATION_IDLE;
 
-
-
+extern TIM_HandleTypeDef htim6;
+extern HCD_HandleTypeDef hhcd;
 
 uint32_t bytesRead;
-				uint32_t fileSize;	
-				uint8_t buffer[1024];
-				uint8_t *flashAddress;
+uint32_t fileSize;	
+uint8_t buffer[1024];
+uint8_t *flashAddress;
 
 HAL_StatusTypeDef  statusEasyFlash;
 HAL_StatusTypeDef	 statusUnlockFlash;
@@ -63,23 +64,20 @@ HAL_StatusTypeDef	 statusUnlockFlash;
 /*Variable used for Erase procedure*/
 static FLASH_EraseInitTypeDef EraseInitStruct;
 
-
-
-
 /* Private function prototypes -----------------------------------------------*/
 static void MPU_Config(void); 
-static void SystemClock_Config(void);
-static void Error_Handler(void);
-static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
 static void CPU_CACHE_Enable(void);
+static void SystemClock_Config(void);
+static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
 static uint32_t GetSector(uint32_t Address);
-static void load (void);
-static uint32_t GetSector(uint32_t Address);
-
+static void Loading_Program(void);
 static void JumpToApplication(void); 
+
+
 /* Private functions ---------------------------------------------------------*/
+
  uint32_t fireware_size;
- uint32_t time_init;
+ uint32_t time_counter;
  uint32_t init_bootload;
  
 /**
@@ -102,13 +100,13 @@ int main(void)
        - Global MSP (MCU Support Package) initialization
      */
   HAL_Init();
-  
   /* Configure the system clock to 180 MHz */
   SystemClock_Config();
-  
+	MX_TIM6_Init();
+	HAL_TIM_Base_Start_IT(&htim6);
   /* Configure LED_BLUE and LED_RED */
-  //BSP_LED_Init(LED_BLUE);
-  //BSP_LED_Init(LED_RED);  
+	MX_GPIO_Init();
+	
   
 	/* Get the 1st sector to erase */
   FirstSector = GetSector(FLASH_USER_START_ADDR);
@@ -136,18 +134,18 @@ int main(void)
     /*##-5- Run Application (Blocking mode) ##################################*/
     while (1)
     {
-			if (time_init != 10000000 || init_bootload == 1 )
+			if (time_counter != DELAY_BOOTLOADER || init_bootload == 1 )
 			{
-
+				
       /* USB Host Background task */
       USBH_Process(&hUSBHost);
-      time_init ++;
+      
       /* Mass Storage Application State Machine */
       switch(AppliState)
 				{
 				case APPLICATION_START:
 					init_bootload = 1;
-					load();
+					Loading_Program();
 					AppliState = APPLICATION_IDLE;
 					
 					break;
@@ -175,15 +173,8 @@ int main(void)
   * @retval None
   */
 
-static void load(void)
+static void Loading_Program(void)
 {
-  FRESULT res;                                          /* FatFs function common result code */
-  uint32_t byteswritten, bytesread;                     /* File write/read counts */
-  uint8_t wtext[] = "This is STM32 working with FatFs"; /* File write buffer */
-  //uint8_t rtext[100];                                   /* File read buffer */
-	uint8_t rtext[100];
-	uint32_t current_size = 0;
-	
   /* Register the file system object to the FatFs module */
   if(f_mount(&USBDISKFatFs, (TCHAR const*)USBDISKPath, 0) != FR_OK)
   {
@@ -194,20 +185,19 @@ static void load(void)
   { 
 			
 		/* Open the text file object with read access */
-		if(f_open(&MyFile, "fireware.bin", FA_OPEN_EXISTING | FA_READ) != FR_OK)
+		if(f_open(&firewareFile, "fireware.bin", FA_OPEN_EXISTING | FA_READ) != FR_OK)
 		{
-			/* 'STM32.TXT' file Open for read Error */
+			/* '' file Open for read Error */
 			Error_Handler();
 		}
 		else
 		{
 			statusUnlockFlash = HAL_FLASH_Unlock();
 			
-			fireware_size = f_size(&MyFile);
+			fireware_size = f_size(&firewareFile);
 			if (fireware_size>0)
 			{
 				
-				//HAL_Delay(100);
 				/*очищаем flash*/
 				if (statusUnlockFlash != HAL_OK)
 				{	
@@ -217,21 +207,6 @@ static void load(void)
 					statusEasyFlash = HAL_FLASHEx_Erase(&EraseInitStruct, &SECTORError);
 					if  (statusEasyFlash != HAL_OK)
 					{
-						/*
-							Error occurred while sector erase.
-							User can add here some code to deal with this error.
-							SECTORError will contain the faulty sector and then to know the code error on this sector,
-							user can call function 'HAL_FLASH_GetError()'
-						*/
-						/* Infinite loop */
-						//while (1)
-					//	{
-							/* Make LED1 blink (100ms on, 2s off) to indicate error in Erase operation */
-							/*BSP_LED_On(LED1);
-							HAL_Delay(100);
-							BSP_LED_Off(LED1);
-						/	HAL_Delay(2000);*/
-						//}
 					}
 					
 					Address = FLASH_USER_START_ADDR;
@@ -241,7 +216,7 @@ static void load(void)
 					flashAddress = (uint8_t*)FLASH_USER_START_ADDR; 
 					 
 					for (uint32_t i = 0; i < fireware_size; i += sizeof(buffer)) {
-							f_read(&MyFile, buffer, sizeof(buffer), &bytesRead);
+							f_read(&firewareFile, buffer, sizeof(buffer), &bytesRead);
 							for (uint32_t j = 0; j < bytesRead; j += 4) {
 									HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, 
 																	 (uint32_t)(flashAddress + i + j), 
@@ -252,17 +227,7 @@ static void load(void)
 				
 				
 				HAL_FLASH_Lock();
-				f_close(&MyFile);  
-				/*if((bytesread == 0) || (res != FR_OK))
-				{*/
-					/* 'STM32.TXT' file Read or EOF Error */
-				/*	Error_Handler();
-				}
-				else
-				{*/
-					/* Close the open text file */
-				/*	f_close(&MyFile);  
-				}*/
+				f_close(&firewareFile);  
 			}
 			
 		}
@@ -311,7 +276,10 @@ static void JumpToApplication(void)
    // if ((*(__IO uint32_t*)FLASH_USER_START_ADDR & 0x2FFE0000) == 0x20000000) {
         HAL_RCC_DeInit();
         HAL_DeInit();
-        
+				MX_GPIO_DeInit();
+				HAL_TIM_Base_Stop_IT(&htim6);
+        HAL_TIM_Base_MspDeInit(&htim6);
+				HAL_HCD_MspDeInit(&hhcd);
         __set_MSP(*(__IO uint32_t*)FLASH_USER_START_ADDR);
         SCB->VTOR = FLASH_USER_START_ADDR;
 				SysTick->CTRL   = 0UL;
@@ -399,7 +367,7 @@ void SystemClock_Config(void)
   * @param  None
   * @retval None
   */
-static void Error_Handler(void)
+void Error_Handler(void)
 {
   /* Turn LED_RED on */
   //BSP_LED_On(LED_RED);
@@ -490,6 +458,8 @@ static void MPU_Config(void)
   /* Enable the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 }
+
+
 
 #ifdef  USE_FULL_ASSERT
 /**
