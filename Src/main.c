@@ -134,7 +134,7 @@ int main(void)
     /*##-5- Run Application (Blocking mode) ##################################*/
     while (1)
     {
-			if (time_counter != DELAY_BOOTLOADER || init_bootload == 1 )
+			if (time_counter < DELAY_BOOTLOADER || init_bootload == 1 )
 			{
 				
       /* USB Host Background task */
